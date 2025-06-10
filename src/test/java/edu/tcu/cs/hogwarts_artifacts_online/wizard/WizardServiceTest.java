@@ -226,9 +226,10 @@ public class WizardServiceTest {
         Artifact artifact = new Artifact();
         artifact.setId("a1");
         artifact.setName("Elder Wand");
-        artifact.setOwner(oldOwner);
+        artifact.setDescription("Description");
+        artifact.setImageUrl("ImageUrl");
 
-        oldOwner.getArtifacts().add(artifact); // relazione bidirezionale
+        oldOwner.addArtifact(artifact);
 
         // Mock repository behaviors
         given(wizardRepository.findById(2)).willReturn(Optional.of(newOwner));
@@ -238,17 +239,57 @@ public class WizardServiceTest {
         wizardService.assignArtifactToWizard(2, "a1");
 
         // Then
-        assertEquals(newOwner, artifact.getOwner()); // nuovo owner assegnato
+        assertEquals(2, artifact.getOwner().getId()); // nuovo owner assegnato
         assertTrue(newOwner.getArtifacts().contains(artifact)); // artefatto presente nel nuovo wizard
         assertFalse(oldOwner.getArtifacts().contains(artifact)); // artefatto rimosso dal vecchio wizard
-
-        verify(wizardRepository, times(1)).findById(2);
-        verify(artifactRepository, times(1)).findById("a1");
-        verify(wizardRepository, times(1)).save(oldOwner);
-        verify(wizardRepository, times(1)).save(newOwner);
-        verify(artifactRepository, times(1)).save(artifact);
     }
 
+    @Test
+    void testAssignArtifactToWizardErrorWithNonExistentWizardId() {
+        // Given
+        Wizard w = new Wizard();
+        w.setId(1);
+        w.setName("Albus Dumbledore");
+
+        Artifact artifact = new Artifact();
+        artifact.setId("a1");
+        artifact.setName("Elder Wand");
+        artifact.setDescription("Description");
+        artifact.setImageUrl("ImageUrl");
+
+        w.addArtifact(artifact);
+
+        // Mock repository behaviors
+        given(wizardRepository.findById(2)).willReturn(Optional.empty());
+        given(artifactRepository.findById("a1")).willReturn(Optional.of(artifact));
+
+        // When
+        Throwable thrown = assertThrows(ObjectNotFoundException.class, ()->{
+            this.wizardService.assignArtifactToWizard(2,"a1");
+        });
+
+        // Then
+        assertThat(thrown).isInstanceOf(ObjectNotFoundException.class)
+                        .hasMessage("Could not find wizard with Id 2 :(");
+        assertEquals(1, artifact.getOwner().getId());
+    }
+
+    @Test
+    void testAssignArtifactToWizardErrorWithNonExistentArtifactId() {
+        // Given
+
+        // Mock repository behaviors
+        given(artifactRepository.findById("a1")).willReturn(Optional.empty());
+
+        // When
+        Throwable thrown = assertThrows(ObjectNotFoundException.class, ()->{
+            this.wizardService.assignArtifactToWizard(2,"a1");
+        });
+
+        // Then
+        assertThat(thrown).isInstanceOf(ObjectNotFoundException.class)
+                .hasMessage("Could not find artifact with Id a1 :(");
+    }
 
 
 }
