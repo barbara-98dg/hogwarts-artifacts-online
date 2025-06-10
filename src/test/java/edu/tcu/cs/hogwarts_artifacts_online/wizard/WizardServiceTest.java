@@ -2,6 +2,7 @@ package edu.tcu.cs.hogwarts_artifacts_online.wizard;
 
 import edu.tcu.cs.hogwarts_artifacts_online.artifact.Artifact;
 import edu.tcu.cs.hogwarts_artifacts_online.artifact.ArtifactRepository;
+import edu.tcu.cs.hogwarts_artifacts_online.system.exception.ObjectNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -85,7 +86,7 @@ public class WizardServiceTest {
         });
 
         //Then
-        assertThat(thrown).isInstanceOf(WizardNotFoundException.class).hasMessage("Could not find wizard with Id 2 :(");
+        assertThat(thrown).isInstanceOf(ObjectNotFoundException.class).hasMessage("Could not find wizard with Id 2 :(");
         verify(wizardRepository, times(1)).findById(2);
     }
 
@@ -155,7 +156,7 @@ public class WizardServiceTest {
 
         given(wizardRepository.findById(5)).willReturn(Optional.empty());
         //When
-        assertThrows(WizardNotFoundException.class, ()->{
+        assertThrows(ObjectNotFoundException.class, ()->{
             wizardService.update(5, update);
         });
 
@@ -193,7 +194,7 @@ public class WizardServiceTest {
         assertNull(artifact1.getOwner());
         assertNull(artifact2.getOwner());
 
-        verify(artifactRepository).saveAll(artifacts);
+        //verify(artifactRepository).saveAll(artifacts);
         verify(wizardRepository, times(1)).deleteById(5);
     }
 
@@ -203,7 +204,7 @@ public class WizardServiceTest {
         given(wizardRepository.findById(5)).willReturn(Optional.empty());
 
         // When
-        assertThrows(WizardNotFoundException.class, ()->{
+        assertThrows(ObjectNotFoundException.class, ()->{
             wizardService.delete(5);
         });
 

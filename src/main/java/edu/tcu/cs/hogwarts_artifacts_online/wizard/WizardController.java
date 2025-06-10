@@ -1,6 +1,5 @@
 package edu.tcu.cs.hogwarts_artifacts_online.wizard;
 
-import edu.tcu.cs.hogwarts_artifacts_online.artifact.dto.ArtifactDto;
 import edu.tcu.cs.hogwarts_artifacts_online.system.Result;
 import edu.tcu.cs.hogwarts_artifacts_online.system.StatusCode;
 import edu.tcu.cs.hogwarts_artifacts_online.wizard.converter.WizardDtoToWizardConverter;
@@ -13,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/wizards")
+@RequestMapping("${api.endpoint.base-url}/wizards")
 public class WizardController {
 
     private final WizardService wizardService;

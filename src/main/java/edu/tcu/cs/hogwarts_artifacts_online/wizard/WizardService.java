@@ -1,8 +1,8 @@
 package edu.tcu.cs.hogwarts_artifacts_online.wizard;
 
 import edu.tcu.cs.hogwarts_artifacts_online.artifact.Artifact;
-import edu.tcu.cs.hogwarts_artifacts_online.artifact.ArtifactNotFoundException;
 import edu.tcu.cs.hogwarts_artifacts_online.artifact.ArtifactRepository;
+import edu.tcu.cs.hogwarts_artifacts_online.system.exception.ObjectNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +23,7 @@ public class WizardService {
 
     public Wizard findById(Integer wizardId){
         return this.wizardRepository.findById(wizardId)
-                .orElseThrow(()->new WizardNotFoundException(wizardId));
+                .orElseThrow(()->new ObjectNotFoundException("wizard", wizardId));
     }
 
     public List<Wizard> findAll(){
@@ -40,23 +40,27 @@ public class WizardService {
                     oldWizard.setName(update.getName());
                     return this.wizardRepository.save(oldWizard);
                 })
-                .orElseThrow(()->new WizardNotFoundException(wizardId));
+                .orElseThrow(()->new ObjectNotFoundException("wizard", wizardId));
     }
 
     public void delete(Integer wizardId){
         Wizard wizard = this.wizardRepository.findById(wizardId)
-                .orElseThrow(() -> new WizardNotFoundException(wizardId));
-        List<Artifact> artifacts = wizard.getArtifacts();
+                .orElseThrow(() -> new ObjectNotFoundException("wizard", wizardId));
+
+        /*List<Artifact> artifacts = wizard.getArtifacts();
         artifacts.forEach(a -> a.setOwner(null));
         artifactRepository.saveAll(artifacts);
+        */
+        wizard.removeAllArtifacts();
+
         this.wizardRepository.deleteById(wizardId);
     }
 
     public void assignArtifactToWizard(Integer wizardId, String artifactId){
         Wizard wizard = this.wizardRepository.findById(wizardId)
-                .orElseThrow(() -> new WizardNotFoundException(wizardId));
+                .orElseThrow(() -> new ObjectNotFoundException("wizard", wizardId));
         Artifact artifact = this.artifactRepository.findById(artifactId)
-                .orElseThrow(()-> new ArtifactNotFoundException(artifactId));
+                .orElseThrow(()-> new ObjectNotFoundException("artifact", artifactId));
         if(artifact.getOwner() != null){
             Wizard oldOwner = artifact.getOwner();
             oldOwner.removeArtifact(artifact);
