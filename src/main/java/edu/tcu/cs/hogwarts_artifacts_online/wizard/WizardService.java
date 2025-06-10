@@ -57,17 +57,14 @@ public class WizardService {
     }
 
     public void assignArtifactToWizard(Integer wizardId, String artifactId){
-        Wizard wizard = this.wizardRepository.findById(wizardId)
-                .orElseThrow(() -> new ObjectNotFoundException("wizard", wizardId));
         Artifact artifact = this.artifactRepository.findById(artifactId)
                 .orElseThrow(()-> new ObjectNotFoundException("artifact", artifactId));
+        Wizard wizard = this.wizardRepository.findById(wizardId)
+                .orElseThrow(() -> new ObjectNotFoundException("wizard", wizardId));
         if(artifact.getOwner() != null){
             Wizard oldOwner = artifact.getOwner();
             oldOwner.removeArtifact(artifact);
-            this.wizardRepository.save(oldOwner);
         }
         wizard.addArtifact(artifact);
-        this.wizardRepository.save(wizard);
-        this.artifactRepository.save(artifact);
     }
 }

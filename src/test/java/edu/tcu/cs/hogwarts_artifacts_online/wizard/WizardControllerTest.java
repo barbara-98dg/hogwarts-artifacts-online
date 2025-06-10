@@ -199,13 +199,36 @@ public class WizardControllerTest {
     @Test
     void testAssignArtifactToWizardSuccess() throws Exception {
 
-        Integer wizardId = 1;
-        String artifactId = "a1";
+        doNothing().when(this.wizardService).assignArtifactToWizard(2,"a1");
 
-        this.mockMvc.perform(put(this.baseUrl+"/wizards/{wizardId}/artifacts/{artifactId}", wizardId, artifactId).accept(MediaType.APPLICATION_JSON))
+        this.mockMvc.perform(put(this.baseUrl+"/wizards/2/artifacts/a1").accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.flag").value(true))
                 .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
                 .andExpect(jsonPath("$.message").value("Artifact Assignment Success"))
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @Test
+    void testAssignArtifactToWizardErrorWithNonExistentWizardId() throws Exception {
+
+        doThrow(new ObjectNotFoundException("wizard", 5)).when(this.wizardService).assignArtifactToWizard(5,"a1");
+
+        this.mockMvc.perform(put(this.baseUrl+"/wizards/5/artifacts/a1").accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.flag").value(false))
+                .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
+                .andExpect(jsonPath("$.message").value("Could not find wizard with Id 5 :("))
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @Test
+    void testAssignArtifactToWizardErrorWithNonExistentArtifactId() throws Exception {
+
+        doThrow(new ObjectNotFoundException("artifact", "a1")).when(this.wizardService).assignArtifactToWizard(5,"a1");
+
+        this.mockMvc.perform(put(this.baseUrl+"/wizards/5/artifacts/a1").accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.flag").value(false))
+                .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
+                .andExpect(jsonPath("$.message").value("Could not find artifact with Id a1 :("))
                 .andExpect(jsonPath("$.data").isEmpty());
     }
 }
